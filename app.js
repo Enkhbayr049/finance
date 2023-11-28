@@ -7,7 +7,7 @@ var uiController = (function () {
     addBtn: ".add__btn",
   };
   return {
-    gitInput: function () {
+    getInput: function () {
       return {
         type: document.querySelector(DOMstrings.inputType).value,
         description: document.querySelector(DOMstrings.inputDescription).value,
@@ -16,6 +16,26 @@ var uiController = (function () {
     },
     getDOMstrings: function () {
       return DOMstrings;
+    },
+
+    addListItem: function (item, type) {
+      var html, list;
+      if (type === "inc") {
+        list = ".income__list";
+        html =
+          '<div class="item clearfix" id="income-%id%"><div class="item__description">$$DESCRIPTION$$</div><div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__delete">            <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div>        </div></div>';
+      } else {
+        list = ".expenses__list";
+        html =
+          '<div class="item clearfix" id="expense-%id%"><div class="item__description">$$DESCRIPTION$$</div>          <div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn">                <i class="ion-ios-close-outline"></i></button></div></div></div>';
+      }
+      // Ð¢ÑÑ€ HTML Ð´Ð¾Ñ‚Ñ€Ð¾Ð¾ Ð¾Ñ€Ð»Ð¾Ð³Ð¾ Ð·Ð°Ñ€Ð»Ð°Ð³Ñ‹Ð½ ÑƒÑ‚Ð³ÑƒÑƒÐ´Ñ‹Ð³ REPLACE Ð°ÑˆÐ¸Ð³Ð»Ð°Ð¶ Ó©Ó©Ñ€Ñ‡Ð¸Ð»Ð¶
+      html = html.replace("%id%", item.id);
+      html = html.replace("$$DESCRIPTION$$", item.description);
+      html = html.replace("$$VALUE$$", item.value);
+
+      // Ð‘ÑÐ»Ñ‚Ð³ÑÑÑÐ½ HTML ÑÑ DOM Ñ€ÑƒÑƒ Ñ…Ð¸Ð¹Ð¶ Ó©Ð³Ð½Ó©.
+      document.querySelector(list).insertAdjacentHTML("beforeend", html);
     },
   };
 })();
@@ -52,7 +72,6 @@ var financeController = (function () {
 
       if (data.items[type].length === 0) id = 1;
       else {
-        XMLDocument;
         id = data.items[type][data.items[type].length - 1].id + 1;
       }
 
@@ -63,6 +82,8 @@ var financeController = (function () {
       }
 
       data.items[type].push(item);
+
+      return item;
     },
 
     seeData: function () {
@@ -75,11 +96,16 @@ var financeController = (function () {
 var appController = (function (uiController, financeController) {
   var ctrlAddItem = function () {
     // console.log(uiController.gitInput());
-    var input = uiController.gitInput();
+    var input = uiController.getInput();
     //1. оруулсан өгөгдөлийг дэлгэцээс олж авна.
     //2. олж авсан өгөгдөлөө өгөгдөлүүдээ санхүүгийн контроллерт дамжуулж тэнд хадгална.
-    financeController.addItem(input.type, input.description, input.value);
+    var item = financeController.addItem(
+      input.type,
+      input.description,
+      input.value
+    );
     //3. олж авсан өгөгдөлөө вэбийн тохирох хэсэгт гаргана.
+    uiController.addListItem(item, input.type);
     //4. төсөвийг тооцоолно.
     //5. эцэсийн үлдэгдэл тооцоог дэлгэцэд гаргана.
   };
