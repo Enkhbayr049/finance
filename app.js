@@ -5,27 +5,42 @@ var uiController = (function () {
     inputDescription: ".add__description",
     inputValue: ".add__value",
     addBtn: ".add__btn",
+    incomeList: ".income__list",
+    expenseList: ".expenses__list",
   };
   return {
     getInput: function () {
       return {
         type: document.querySelector(DOMstrings.inputType).value,
         description: document.querySelector(DOMstrings.inputDescription).value,
-        value: document.querySelector(DOMstrings.inputValue).value,
+        value: parseInt(document.querySelector(DOMstrings.inputValue).value),
       };
     },
     getDOMstrings: function () {
       return DOMstrings;
     },
 
+    clearFields: function () {
+      var fields = document.querySelectorAll(
+        DOMstrings.inputDescription + ", " + DOMstrings.inputValue
+      );
+
+      var fieldsArr = Array.prototype.slice.call(fields);
+
+      for (var i = 0; i < fieldsArr.length; i++) {
+        fieldsArr[i].value = "";
+      }
+      fieldsArr[0].focus();
+    },
+
     addListItem: function (item, type) {
       var html, list;
       if (type === "inc") {
-        list = ".income__list";
+        list = DOMstrings.incomeList;
         html =
           '<div class="item clearfix" id="income-%id%"><div class="item__description">$$DESCRIPTION$$</div><div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__delete">            <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div>        </div></div>';
       } else {
-        list = ".expenses__list";
+        list = DOMstrings.expenseList;
         html =
           '<div class="item clearfix" id="expense-%id%"><div class="item__description">$$DESCRIPTION$$</div>          <div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn">                <i class="ion-ios-close-outline"></i></button></div></div></div>';
       }
@@ -54,6 +69,14 @@ var financeController = (function () {
     this.value = value;
   };
 
+  var calculateTotal = function (type) {
+    var sum = 0;
+    data.items[type].forEach(function (el) {
+      sum = sum + el.value;
+    });
+    data.totals[type] = sum;
+  };
+
   var data = {
     items: {
       inc: [],
@@ -64,9 +87,28 @@ var financeController = (function () {
       inc: 0,
       exp: 0,
     },
+    tusuv: 0,
+    huvi: 0,
   };
 
   return {
+    tusuvTootsoloh: function () {
+      calculateTotal("inc");
+      calculateTotal("exp");
+
+      data.tusuv = data.totals.inc - data.totals.exp;
+
+      data.huvi = Math.round((data.totals.exp / data.totals.inc) * 100);
+    },
+    tusuviigAvah: function () {
+      return {
+        tusuv: data.tusuv,
+        huvi: data.huvi,
+        totalinc: data.totals.inc,
+        totalexp: data.totals.exp,
+      };
+    },
+
     addItem: function (type, desc, val) {
       var item, id;
 
@@ -97,17 +139,23 @@ var appController = (function (uiController, financeController) {
   var ctrlAddItem = function () {
     // console.log(uiController.gitInput());
     var input = uiController.getInput();
-    //1. оруулсан өгөгдөлийг дэлгэцээс олж авна.
-    //2. олж авсан өгөгдөлөө өгөгдөлүүдээ санхүүгийн контроллерт дамжуулж тэнд хадгална.
-    var item = financeController.addItem(
-      input.type,
-      input.description,
-      input.value
-    );
-    //3. олж авсан өгөгдөлөө вэбийн тохирох хэсэгт гаргана.
-    uiController.addListItem(item, input.type);
-    //4. төсөвийг тооцоолно.
-    //5. эцэсийн үлдэгдэл тооцоог дэлгэцэд гаргана.
+    if (input.description !== "" && input.value !== "") {
+      //1. оруулсан өгөгдөлийг дэлгэцээс олж авна.
+      //2. олж авсан өгөгдөлөө өгөгдөлүүдээ санхүүгийн контроллерт дамжуулж тэнд хадгална.
+      var item = financeController.addItem(
+        input.type,
+        input.description,
+        input.value
+      );
+      //3. олж авсан өгөгдөлөө вэбийн тохирох хэсэгт гаргана.
+      uiController.addListItem(item, input.type);
+      uiController.clearFields();
+      financeController.tusuvTootsoloh();
+      var tusuv = financeController.tusuviigAvah();
+      console.log(tusuv);
+      //4. төсөвийг тооцоолно.
+      //5. эцэсийн үлдэгдэл тооцоог дэлгэцэд гаргана.
+    }
   };
   var setUpEventListeners = function () {
     var DOM = uiController.getDOMstrings();
