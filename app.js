@@ -11,6 +11,7 @@ var uiController = (function () {
     incomeLabel: ".budget__income--value",
     expneseLabel: ".budget__expenses--value",
     percentageLabel: ".budget__expenses--percentage",
+    clrBtn: ".item__delete--btn",
   };
   return {
     getInput: function () {
@@ -128,6 +129,17 @@ var financeController = (function () {
       };
     },
 
+    deleteItem: function (type, id) {
+      var ids = data.items[type].map(function (el) {
+        return el.id;
+      });
+      var index = ids.indexOf(id);
+
+      if (index !== -1) {
+        data.items[type].splice(index, 1);
+      }
+    },
+
     addItem: function (type, desc, val) {
       var item, id;
 
@@ -192,7 +204,7 @@ var appController = (function (uiController, financeController) {
     init: function () {
       console.log("app started...");
       uiController.tusuviigUzuuleh({
-        tusuv: 0,   
+        tusuv: 0,
         huvi: 0,
         totalInc: 0,
         totalExp: 0,
