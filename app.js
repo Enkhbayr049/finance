@@ -68,12 +68,11 @@ var uiController = (function () {
         html =
           '<div class="item clearfix" id="exp-%id%"><div class="item__description">$$DESCRIPTION$$</div>          <div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn">                <i class="ion-ios-close-outline"></i></button></div></div></div>';
       }
-      // Ð¢ÑÑ€ HTML Ð´Ð¾Ñ‚Ñ€Ð¾Ð¾ Ð¾Ñ€Ð»Ð¾Ð³Ð¾ Ð·Ð°Ñ€Ð»Ð°Ð³Ñ‹Ð½ ÑƒÑ‚Ð³ÑƒÑƒÐ´Ñ‹Ð³ REPLACE Ð°ÑˆÐ¸Ð³Ð»Ð°Ð¶ Ó©Ó©Ñ€Ñ‡Ð¸Ð»Ð¶
+
       html = html.replace("%id%", item.id);
       html = html.replace("$$DESCRIPTION$$", item.description);
       html = html.replace("$$VALUE$$", item.value);
 
-      // Ð‘ÑÐ»Ñ‚Ð³ÑÑÑÐ½ HTML ÑÑ DOM Ñ€ÑƒÑƒ Ñ…Ð¸Ð¹Ð¶ Ó©Ð³Ð½Ó©.
       document.querySelector(list).insertAdjacentHTML("beforeend", html);
     },
   };
@@ -185,14 +184,21 @@ var appController = (function (uiController, financeController) {
       //3. олж авсан өгөгдөлөө вэбийн тохирох хэсэгт гаргана.
       uiController.addListItem(item, input.type);
       uiController.clearFields();
-      financeController.tusuvTootsoloh();
-      var tusuv = financeController.tusuviigAvah();
-      // console.log(tusuv);
-      uiController.tusuviigUzuuleh(tusuv);
-      //4. төсөвийг тооцоолно.
-      //5. эцэсийн үлдэгдэл тооцоог дэлгэцэд гаргана.
+      updateTusuv();
     }
   };
+  var updateTusuv = function () {
+    financeController.tusuvTootsoloh();
+
+    var tusuv = financeController.tusuviigAvah();
+
+    // console.log(tusuv);
+    uiController.tusuviigUzuuleh(tusuv);
+  };
+
+  //4. төсөвийг тооцоолно.
+  //5. эцэсийн үлдэгдэл тооцоог дэлгэцэд гаргана.
+
   var setUpEventListeners = function () {
     var DOM = uiController.getDOMstrings();
     document.querySelector(DOM.addBtn).addEventListener("click", function () {
@@ -217,6 +223,8 @@ var appController = (function (uiController, financeController) {
           financeController.deleteItem(type, itemId);
 
           uiController.deleteListItem(id);
+
+          updateTusuv();
         }
       });
   };
